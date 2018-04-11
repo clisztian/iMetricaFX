@@ -1,0 +1,86 @@
+.chart {
+    -fx-background-image: url("./background.png");
+    -fx-padding: 15 25 15 15;
+}
+.chart-plot-background {
+    -fx-background-color: red;
+    -fx-background-image: url("./chart-background.png"), url("./graph-gridlines.png");
+    -fx-background-size: cover, auto;
+    -fx-background-repeat: no-repeat, repeat;
+    -fx-background-position: 0% 0%, 0% 100%;
+    -fx-border-color: black black transparent transparent;
+}
+
+.chart-title {
+  -fx-text-fill: white;
+  -fx-font-size: 1.6em;
+}
+
+.default-color0.chart-line-symbol {
+    -fx-background-color: #66b0ff;
+/*    -fx-padding: 0;*/
+}
+.default-color1.chart-line-symbol {
+    -fx-background-color: #ca99ff;
+/*    -fx-padding: 0;*/
+}
+.default-color2.chart-line-symbol {
+    -fx-background-color: #4d6680;
+/*    -fx-padding: 0;*/
+}
+.default-color3.chart-line-symbol {
+    -fx-background-color: #ff4d4d;
+/*    -fx-padding: 0;*/
+}
+.default-color4.chart-line-symbol {
+    -fx-background-color: #ffa366;
+/*    -fx-padding: 0;*/
+}
+
+.default-color0.chart-series-line { 
+    -fx-stroke: #ffddcc; 
+    -fx-stroke-width: 1px; 
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.8) , 10, 0.0 , 0 , 2 );
+}
+.default-color1.chart-series-line { 
+    -fx-stroke: #f2e6ff; 
+    -fx-stroke-width: 1px; 
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.8) , 10, 0.0 , 0 , 2 );
+}
+.default-color2.chart-series-line { 
+    -fx-stroke: #dda0dd; 
+    -fx-stroke-width: 1px; 
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.8) , 10, 0.0 , 0 , 2 );
+}
+.default-color3.chart-series-line { 
+    -fx-stroke: #e6f2ff; 
+    -fx-stroke-width: 1px; 
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.8) , 10, 0.0 , 0 , 2 );
+}
+.default-color4.chart-series-line { 
+    -fx-stroke: #ffe0cc; 
+    -fx-stroke-width: 1px; 
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.8) , 10, 0.0 , 0 , 2 );
+}
+
+
+.axis {
+    -fx-tick-mark-visible: false;
+    -fx-minor-tick-visible: false;
+    -fx-tick-length: 3;
+    -fx-minor-tick-length: 0;
+    -fx-border-color: transparent;
+}
+.axis:bottom {
+    -fx-border-color: black transparent transparent transparent;
+}
+.axis:left {
+    -fx-border-color: transparent black transparent transparent;
+}
+.axis Text{
+    -fx-fill: white;
+}
+.tick-mark {
+    -fx-font-size: 10px;
+    -fx-effect: dropshadow( one-pass-box , rgba(0,0,0,0.8) , 0, 0.0 , 0 , 1 );
+}

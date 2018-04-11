@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="1095.0" prefWidth="1500.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.iMetricaFXController">
+  <children>
+    <MenuBar prefHeight="29.0" prefWidth="1573.0" VBox.vgrow="NEVER">
+      <menus>
+        <Menu fx:id="FileMenu" mnemonicParsing="false" text="File">
+          <items>
+            <MenuItem fx:id="openDataFile" mnemonicParsing="false" onAction="#handleOpenDataFile" text="Open…" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem fx:id="closeFile" mnemonicParsing="false" text="Close" />
+            <MenuItem fx:id="saveFilterCoefficients" mnemonicParsing="false" text="Save Filter" />
+            <MenuItem fx:id="saveFilterSpecs" mnemonicParsing="false" text="Save Filter Specification" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Preferences…" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Quit" />
+          </items>
+        </Menu>
+        <Menu fx:id="EditMenu" mnemonicParsing="false" text="TimeFormat">
+               <items>
+                  <RadioMenuItem fx:id="yyyyMMdd" mnemonicParsing="false" onAction="#handleDateFormatSelectToggle" text="&quot;yyyy-MM-dd&quot;" />
+                  <RadioMenuItem fx:id="yyyyMMddHHmmss" mnemonicParsing="false" onAction="#handleDateFormatSelectToggle" text="&quot;yyyy-MM-dd HH:mm:ss&quot;" />
+               </items>
+        </Menu>
+            <Menu mnemonicParsing="false" text="Windows">
+               <items>
+                  <CheckMenuItem fx:id="frfCheckbox" mnemonicParsing="false" onAction="#toggleFrFWindow" text="Frequency Response" />
+                  <CheckMenuItem fx:id="coeffCheckbox" mnemonicParsing="false" onAction="#toggleCoefficientWindow" text="Coefficients" />
+                  <CheckMenuItem fx:id="phaseCheckbox" mnemonicParsing="false" onAction="#togglePhaseWindow" text="PhaseDelay" />
+               </items>
+            </Menu>
+        <Menu fx:id="HelpMenu" mnemonicParsing="false" text="Help">
+          <items>
+            <MenuItem mnemonicParsing="false" text="About iMetrica " />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+    <AnchorPane fx:id="controlPanel" maxHeight="-1.0" maxWidth="-1.0" prefHeight="806.0" prefWidth="1072.0" VBox.vgrow="ALWAYS">
+      <children>
+            <Slider fx:id="smoothness" accessibleText="Smooth" blockIncrement="0.01" layoutX="1230.0" layoutY="871.0" majorTickUnit="0.1" max="1.0" onKeyPressed="#handleSmoothnessChange" onMouseDragged="#handleSmoothnessChange" prefHeight="26.0" prefWidth="189.0" />
+            <Slider fx:id="decayStart" accessibleText="DecayStart" blockIncrement="0.01" layoutX="1230.0" layoutY="911.0" majorTickUnit="0.1" max="1.0" onKeyPressed="#handleDecayStartChange" onMouseDragged="#handleDecayStartChange" prefHeight="26.0" prefWidth="189.0" />
+            <Slider fx:id="decayStrength" accessibleText="DecayStrength" blockIncrement="0.01" layoutX="1230.0" layoutY="952.0" majorTickUnit="0.1" max="1.0" onKeyPressed="#handleDecayStrengthChange" onMouseDragged="#handleDecayStrengthChange" prefHeight="26.0" prefWidth="189.0" />
+            <Slider fx:id="crossCorrelation" accessibleText="Cross" blockIncrement="0.01" layoutX="1230.0" layoutY="995.0" majorTickUnit="0.1" max="1.0" onKeyPressed="#handleCrossCorrelationChange" onMouseDragged="#handleCrossCorrelationChange" prefHeight="26.0" prefWidth="189.0" />
+            <Label fx:id="smoothnessLabel" layoutX="1113.0" layoutY="870.0" prefHeight="16.0" prefWidth="98.0" text="Smoothness" />
+            <Label fx:id="decayStartLabel" layoutX="1114.0" layoutY="911.0" prefHeight="16.0" prefWidth="98.0" text="DecayStart" />
+            <Label fx:id="decayStrengthLabel" layoutX="1113.0" layoutY="952.0" text="DecayStrength" />
+            <Label fx:id="crossCorrelationLabel" layoutX="1112.0" layoutY="994.0" text="CrossCorrelation" />
+            <Label fx:id="FilterRegularization" layoutX="1109.0" layoutY="828.0" prefHeight="26.0" prefWidth="237.0" text="Filter Regularization" textFill="#d7d5fb">
+               <font>
+                  <Font size="17.0" />
+               </font>
+               <effect>
+                  <Glow level="0.6" />
+               </effect>
+            </Label>
+            <Label fx:id="FilterCustomizationLabel" layoutX="368.0" layoutY="828.0" prefHeight="26.0" prefWidth="237.0" text="Filter Customization" textFill="#d7d5fb">
+               <font>
+                  <Font size="17.0" />
+               </font>
+               <effect>
+                  <Glow level="0.6" />
+               </effect>
+            </Label>
+            <TextField fx:id="smoothnessText" layoutX="1421.0" layoutY="864.0" prefHeight="26.0" prefWidth="51.0" text="0.0" />
+            <TextField fx:id="decayStartText" layoutX="1421.0" layoutY="904.0" prefHeight="26.0" prefWidth="51.0" text="0.0" />
+            <TextField fx:id="decayStrengthText" layoutX="1421.0" layoutY="946.0" prefHeight="26.0" prefWidth="51.0" text="0.0" />
+            <TextField fx:id="crossCorrelationText" layoutX="1422.0" layoutY="990.0" prefHeight="26.0" prefWidth="51.0" text="0.0" />
+            <Slider fx:id="alphaSlider" accessibleText="Alpha" blockIncrement="0.1" layoutX="437.0" layoutY="909.0" majorTickUnit="0.1" max="10.0" onKeyPressed="#handleAlphaChange" onMouseDragged="#handleAlphaChange" prefHeight="26.0" prefWidth="189.0" />
+            <Slider fx:id="lambdaSlider" accessibleText="Lambda" blockIncrement="0.1" layoutX="437.0" layoutY="868.0" majorTickUnit="0.1" max="10.0" onKeyPressed="#handleLambdaChange" onMouseDragged="#handleLambdaChange" prefHeight="26.0" prefWidth="189.0" />
+            <Label fx:id="lambdaLabel" layoutX="370.0" layoutY="872.0" prefHeight="18.0" prefWidth="62.0" text="Lambda" />
+            <Label fx:id="alphaLabel" layoutX="370.0" layoutY="909.0" prefHeight="18.0" prefWidth="62.0" text="Alpha" />
+            <TextField fx:id="alphaText" layoutX="626.0" layoutY="907.0" prefHeight="26.0" prefWidth="51.0" text="0.0" />
+            <TextField fx:id="lambdaText" layoutX="625.0" layoutY="868.0" prefHeight="26.0" prefWidth="51.0" text="0.0" />
+            <Label fx:id="ForecastingSmoothing" layoutX="368.0" layoutY="950.0" prefHeight="26.0" prefWidth="237.0" text="Forecasting/Smoothing" textFill="#d7d5fb">
+               <font>
+                  <Font size="17.0" />
+               </font>
+               <effect>
+                  <Glow level="0.6" />
+               </effect>
+            </Label>
+            <Label fx:id="lagLabel" layoutX="373.0" layoutY="994.0" prefHeight="18.0" prefWidth="33.0" text="Lag" />
+            <Slider fx:id="lagSlider" accessibleText="Lag" blockIncrement="0.1" layoutX="396.0" layoutY="991.0" majorTickUnit="1.0" max="5.0" min="-5.0" onKeyPressed="#handleLagChange" onMouseDragged="#handleLagChange" prefHeight="38.0" prefWidth="165.0" showTickLabels="false" />
+            <Label fx:id="TargetFilterLabel" layoutX="703.0" layoutY="828.0" prefHeight="26.0" prefWidth="237.0" text="Target Filter Settings" textFill="#d7d5fb">
+               <font>
+                  <Font size="17.0" />
+               </font>
+               <effect>
+                  <Glow level="0.6" />
+               </effect>
+            </Label>
+            <Slider fx:id="freqCutoff0" blockIncrement="0.01" layoutX="804.0" layoutY="867.0" majorTickUnit="0.1" max="3.0" minorTickCount="5" onKeyPressed="#handleFrequency0Change" onMouseDragged="#handleFrequency0Change" prefHeight="38.0" prefWidth="226.0" />
+            <Slider fx:id="freqCutoff1" blockIncrement="0.01" layoutX="801.0" layoutY="906.0" majorTickUnit="0.1" max="3.14" minorTickCount="5" onKeyPressed="#handleFrequency1Change" onMouseDragged="#handleFrequency1Change" prefHeight="38.0" prefWidth="226.0" value="0.56" />
+            <Label fx:id="freqCutoff0Label" layoutX="711.0" layoutY="867.0" prefHeight="16.0" prefWidth="98.0" text="FreqCutoff0" />
+            <Label fx:id="freqCutoff0Label" layoutX="711.0" layoutY="907.0" prefHeight="16.0" prefWidth="98.0" text="FreqCutoff1" />
+            <TextField fx:id="freqCutoff0Text" layoutX="1026.0" layoutY="870.0" prefHeight="26.0" prefWidth="51.0" text="0.0" />
+            <TextField fx:id="freqCutoff1Text" layoutX="1027.0" layoutY="907.0" prefHeight="26.0" prefWidth="51.0" text="0.56" />
+            <CheckBox fx:id="i1Checkbox" layoutX="694.0" layoutY="992.0" mnemonicParsing="false" onKeyPressed="#handleI1Change" onMouseClicked="#handleI1Change" text="i1" />
+            <CheckBox fx:id="i2Checkbox" layoutX="743.0" layoutY="992.0" mnemonicParsing="false" onKeyPressed="#handleI2Change" onMouseClicked="#handleI2Change" text="i2" />
+            <Label fx:id="phaseShiftLabel" layoutX="795.0" layoutY="996.0" prefHeight="18.0" prefWidth="73.0" text="PhaseShift" />
+            <Slider fx:id="phaseShift" accessibleText="PhaseShift" blockIncrement="0.1" layoutX="875.0" layoutY="990.0" majorTickUnit="1.0" max="5.0" min="-5.0" onKeyPressed="#handlePhaseShiftChange" onMouseDragged="#handlePhaseShiftChange" prefHeight="38.0" prefWidth="150.0" showTickLabels="false" />
+            <Label fx:id="FIlterConstraints" layoutX="701.0" layoutY="952.0" prefHeight="26.0" prefWidth="237.0" text="Filter Constraints" textFill="#d7d5fb">
+               <font>
+                  <Font size="17.0" />
+               </font>
+               <effect>
+                  <Glow level="0.6" />
+               </effect>
+            </Label>
+            <Slider fx:id="filterLength" accessibleText="filterLength" blockIncrement="1.0" layoutX="107.0" layoutY="863.0" majorTickUnit="10.0" min="4.0" minorTickCount="10" onKeyPressed="#handleFilterLengthChange" onMouseDragged="#handleFilterLengthChange" prefHeight="38.0" prefWidth="189.0" value="20.0" />
+            <Label fx:id="filterLengthLabel" layoutX="22.0" layoutY="872.0" prefHeight="16.0" prefWidth="98.0" text="Filter Length" />
+            <TextField fx:id="filterLengthText" layoutX="296.0" layoutY="863.0" prefHeight="26.0" prefWidth="51.0" text="20" />
+            <Label fx:id="TimeSeriesLabel" layoutX="23.0" layoutY="828.0" prefHeight="26.0" prefWidth="237.0" text="Target Series " textFill="#d7d5fb">
+               <font>
+                  <Font size="17.0" />
+               </font>
+               <effect>
+                  <Glow level="0.6" />
+               </effect>
+            </Label>
+            <Label fx:id="sampleSizeLabel" layoutX="22.0" layoutY="907.0" text="Sample Size" />
+            <Slider fx:id="sampleSize" accessibleText="InSampleLength" layoutX="107.0" layoutY="904.0" majorTickUnit="50.0" max="1000.0" min="100.0" minorTickCount="10" onKeyPressed="#handleSampleSizeChange" onMouseDragged="#handleSampleSizeChange" prefHeight="26.0" prefWidth="189.0" value="300.0" />
+            <TextField fx:id="sampleSizeText" layoutX="296.0" layoutY="902.0" prefHeight="26.0" prefWidth="51.0" text="300" />
+            <Label fx:id="fractionalDLabel" layoutX="23.0" layoutY="942.0" text="FractionalD" />
+            <Slider fx:id="fractionalD" accessibleText="FractionalDifference" blockIncrement="0.01" layoutX="107.0" layoutY="944.0" majorTickUnit="0.1" max="1.0" minorTickCount="1" onKeyPressed="#handleFractionalDChange" onMouseDragged="#handleFractionalDChange" prefHeight="16.0" prefWidth="189.0" showTickMarks="false" value="0.8" />
+            <TextField fx:id="fractionalDText" layoutX="296.0" layoutY="939.0" prefHeight="26.0" prefWidth="51.0" text="0.8" />
+            <Button fx:id="newObservationButton" layoutX="153.0" layoutY="988.0" mnemonicParsing="false" onKeyPressed="#handleButton" onMouseClicked="#handleButton" prefHeight="34.0" prefWidth="132.0" text="New Observation" />
+            <TextField fx:id="lagText" layoutX="561.0" layoutY="993.0" prefHeight="26.0" prefWidth="43.0" text="0.0" />
+            <StackPane fx:id="plotCanvas" layoutX="14.0" layoutY="14.0" prefHeight="791.0" prefWidth="1471.0" />
+            <Button fx:id="compileData" layoutX="22.0" layoutY="988.0" mnemonicParsing="false" onMouseClicked="#handleCompileData" prefHeight="34.0" prefWidth="125.0" text="Compute Filter" />
+            <TextField fx:id="phaseText" layoutX="1026.0" layoutY="989.0" prefHeight="26.0" prefWidth="51.0" text="0.0" />
+      </children>
+    </AnchorPane>
+  </children>
+</VBox>
