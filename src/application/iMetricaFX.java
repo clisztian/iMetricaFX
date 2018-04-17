@@ -30,7 +30,7 @@ public class iMetricaFX extends Application {
 	        
 	        myController.initiateMDFABase();
 	        myController.initiateCanvas();
-	        myController.setDateFormatToggleGroup();
+	        myController.setToggleGroups();
 	        
 	        primaryStage.show();
 			

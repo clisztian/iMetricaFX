@@ -11,11 +11,11 @@ import org.joda.time.format.DateTimeFormatter;
 
 import ch.imetrica.mdfa.datafeeds.CsvFeed;
 import ch.imetrica.mdfa.mdfa.MDFABase;
-import ch.imetrica.mdfa.mdfa.MDFASolver;
-import ch.imetrica.mdfa.series.MultivariateSeries;
-import ch.imetrica.mdfa.series.SignalSeries;
+import ch.imetrica.mdfa.series.MultivariateFXSeries;
 import ch.imetrica.mdfa.series.TargetSeries;
 import ch.imetrica.mdfa.series.TimeSeriesEntry;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -28,6 +28,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
@@ -39,15 +40,20 @@ public class iMetricaFXController {
 
 	DecimalFormat decimalFormat = new DecimalFormat("#.##");
 	
-	final FileChooser fileChooser = new FileChooser();
-	private MDFABase anyMDFA;
+	final FileChooser fileChooser = new FileChooser();	
+	private ArrayList<MDFABase> anyMDFAs;
+	
 	private Stage primaryStage; 
 	private CsvFeed marketFeed; 
-	private MultivariateSeries multiSeries;	
+	private MultivariateFXSeries multiSeries;
 	private ArrayList<String> csvFileStreams = new ArrayList<String>();
 	private ArrayList<String> assetNames = new ArrayList<String>();
     private String datetimeFormat = new String("yyyy-MM-dd");
 	private ToggleGroup dateFormatSelect;
+	private ToggleGroup targetSeriesSelect;
+	private ToggleGroup signalSelect;
+	private ArrayList<RadioMenuItem> signalRadioMenuList;
+	private ArrayList<RadioMenuItem> targetRadioMenuList;
 
 
 	Stage coeffWindow = new Stage();
@@ -178,16 +184,84 @@ public class iMetricaFXController {
 	
 	@FXML
 	private CheckMenuItem phaseCheckbox;
+	
+	@FXML
+	private CheckMenuItem prefilterCheck;
+	
+	@FXML 
+	private Menu targetSeriesSelection;
+	
+	@FXML 
+	private Menu signalMenu;
+	
+	@FXML 
+	private MenuItem addNewSignal;
 
-	public void setDateFormatToggleGroup() {
+	private int selectedSignal = 0;
+
+	private boolean autocomputeActivated = true;
+
+	public void setToggleGroups() {
 		
 		dateFormatSelect = new ToggleGroup();
 		yyyyMMdd.setToggleGroup(dateFormatSelect);
 		yyyyMMddHHmmss.setToggleGroup(dateFormatSelect);
 		yyyyMMdd.setSelected(true);		
+		
+		targetSeriesSelect = new ToggleGroup();
+		signalSelect = new ToggleGroup();
+		
+		
+		signalRadioMenuList.add((new RadioMenuItem("Signal_1")));
+		signalMenu.getItems().add(signalRadioMenuList.get(0));
+		signalRadioMenuList.get(0).setSelected(true);
+		signalRadioMenuList.get(0).setUserData(""+signalRadioMenuList.size());
+		signalRadioMenuList.get(0).setToggleGroup(signalSelect);
+		
+		
+		targetSeriesSelect.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+	        public void changed(ObservableValue<? extends Toggle> ov,
+	            Toggle old_toggle, Toggle new_toggle) {
+	          if (targetSeriesSelect.getSelectedToggle() != null) {
+	            
+	        	  for(int i = 0; i < targetRadioMenuList.size(); i++) {
+	        		  if(targetSeriesSelect.getSelectedToggle().equals(targetRadioMenuList.get(i))) {
+	        			try {
+	      					
+	        				multiSeries.setTargetSeriesIndex(i);	        				
+	      					sketchCanvas();
+	      				} catch (Exception e) {
+	      					e.printStackTrace();
+	      				}	
+	        		  }
+	        	  }
+	          }
+	        }
+	      });
+		
+		signalSelect.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+	        public void changed(ObservableValue<? extends Toggle> ov,
+	            Toggle old_toggle, Toggle new_toggle) {
+	          if (signalSelect.getSelectedToggle() != null) {
+	            
+	        	  for(int i = 0; i < signalRadioMenuList.size(); i++) {
+	        		  if(signalSelect.getSelectedToggle().equals(signalRadioMenuList.get(i))) {
+	        			  selectedSignal = i;        			  
+	        			  setControlsToMDFABase(anyMDFAs.get(i));	        			  
+	        			  sketchCanvas();
+	        		  }
+	        	  }
+	          }
+	        }
+	      });
+		
 	}
+	
 
 
+
+	
+	
     @FXML 
     protected void handleDateFormatSelectToggle(ActionEvent event) {
     	
@@ -224,17 +298,46 @@ public class iMetricaFXController {
 	}
 	
 	@FXML
+	protected void handleAddNewSignal() {
+		
+		System.out.println("Adding new signal...");
+		anyMDFAs.add(getNewMDFABase());
+		
+		try {
+			
+			multiSeries.addMDFABase(anyMDFAs.get(anyMDFAs.size()-1));
+			
+			signalRadioMenuList.add((new RadioMenuItem("Signal_" + anyMDFAs.size()))); 
+			signalRadioMenuList.get(signalRadioMenuList.size()-1).setUserData(""+signalRadioMenuList.size());
+			signalRadioMenuList.get(signalRadioMenuList.size()-1).setToggleGroup(signalSelect);
+			signalMenu.getItems().add(signalRadioMenuList.get(signalRadioMenuList.size() - 1));
+			signalRadioMenuList.get(signalRadioMenuList.size() - 1).setSelected(true);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+		
+	
+	@FXML
 	protected void handleSmoothnessChange() {
 		
 		double val = smoothness.getValue();
 		smoothnessText.setText(decimalFormat.format(val));
-		anyMDFA.setSmooth(val);
+		anyMDFAs.get(selectedSignal).setSmooth(val);
 		
 		if(multiSeries != null) {
 			try {
-				multiSeries.getMDFAFactory().setSmoothRegularization(val);
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				multiSeries.getMDFAFactory(selectedSignal).setSmoothRegularization(val);
+				
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}			
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -247,13 +350,16 @@ public class iMetricaFXController {
 		
 		double val = decayStrength.getValue();
 		decayStrengthText.setText(decimalFormat.format(val));
-		anyMDFA.setDecayStrength(val);
+		anyMDFAs.get(selectedSignal).setDecayStrength(val);
 		
 		if(multiSeries != null) {
 			try {
-				multiSeries.getMDFAFactory().setDecayStrengthRegularization(val);
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				multiSeries.getMDFAFactory(selectedSignal).setDecayStrengthRegularization(val);
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -265,13 +371,16 @@ public class iMetricaFXController {
 		
 		double val = decayStart.getValue();
 		decayStartText.setText(decimalFormat.format(val));
-		anyMDFA.setDecayStrength(val);
+		anyMDFAs.get(selectedSignal).setDecayStrength(val);
 		
 		if(multiSeries != null) {
 			try {
-				multiSeries.getMDFAFactory().setDecayStartRegularization(val);
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				multiSeries.getMDFAFactory(selectedSignal).setDecayStartRegularization(val);
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -283,13 +392,16 @@ public class iMetricaFXController {
 		
 		double val = crossCorrelation.getValue();
 		crossCorrelationText.setText(decimalFormat.format(val));
-		anyMDFA.setCrossCorr(val);
+		anyMDFAs.get(selectedSignal).setCrossCorr(val);
 		
 		if(multiSeries != null) {
 			try {
-				multiSeries.getMDFAFactory().setCrossRegularization(val);
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				multiSeries.getMDFAFactory(selectedSignal).setCrossRegularization(val);
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -301,13 +413,16 @@ public class iMetricaFXController {
 		
 		double val = alphaSlider.getValue();
 		alphaText.setText(decimalFormat.format(val));
-		anyMDFA.setAlpha(val);
+		anyMDFAs.get(selectedSignal).setAlpha(val);
 		
 		if(multiSeries != null) {
 			try {
-				multiSeries.getMDFAFactory().setAlpha(val);
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				multiSeries.getMDFAFactory(selectedSignal).setAlpha(val);
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -320,13 +435,16 @@ public class iMetricaFXController {
 		
 		double val = lambdaSlider.getValue();
 		lambdaText.setText(decimalFormat.format(val));
-		anyMDFA.setLag(val);
+		anyMDFAs.get(selectedSignal).setLag(val);
 		
 		if(multiSeries != null) {
 			try {
-				multiSeries.getMDFAFactory().setLambda(val);
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				multiSeries.getMDFAFactory(selectedSignal).setLambda(val);
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -340,13 +458,16 @@ public class iMetricaFXController {
 		double val = freqCutoff0.getValue();
 		if(val < (freqCutoff1.getValue() - .02)) {
 			
-			anyMDFA.setBandPassCutoff(val);
+			anyMDFAs.get(selectedSignal).setBandPassCutoff(val);
 			freqCutoff0Text.setText(decimalFormat.format(val));
 			if(multiSeries != null) {
 				try {
-					multiSeries.getMDFAFactory().setBandpassCutoff(val);
-					multiSeries.computeFilterCoefficients();
-					sketchCanvas();
+					multiSeries.getMDFAFactory(selectedSignal).setBandpassCutoff(val);
+					if(autocomputeActivated) {
+						multiSeries.computeFilterCoefficients(selectedSignal);
+						multiSeries.computeAggregateSignal();
+						sketchCanvas();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -360,13 +481,16 @@ public class iMetricaFXController {
 		double val = freqCutoff1.getValue();
 		if(val > (freqCutoff0.getValue() + .02)) {
 			
-			anyMDFA.setLowpassCutoff(val);
+			anyMDFAs.get(selectedSignal).setLowpassCutoff(val);
 			freqCutoff1Text.setText(decimalFormat.format(val));
 			if(multiSeries != null) {
 				try {
-					multiSeries.getMDFAFactory().setLowpassCutoff(val);
-					multiSeries.computeFilterCoefficients();
-					sketchCanvas();
+					multiSeries.getMDFAFactory(selectedSignal).setLowpassCutoff(val);
+					if(autocomputeActivated) {
+						multiSeries.computeFilterCoefficients(selectedSignal);
+						multiSeries.computeAggregateSignal();
+						sketchCanvas();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -379,13 +503,16 @@ public class iMetricaFXController {
 		
 		double val = lagSlider.getValue();
 		lagText.setText(decimalFormat.format(val));
-		anyMDFA.setLag(val);
+		anyMDFAs.get(selectedSignal).setLag(val);
 		
 		if(multiSeries != null) {
 			try {
-				multiSeries.getMDFAFactory().setLag(val);
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				multiSeries.getMDFAFactory(selectedSignal).setLag(val);
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -402,7 +529,7 @@ public class iMetricaFXController {
 		if(multiSeries != null) {
 			try {
 				multiSeries.adjustFractionalDifferenceData(val);
-				multiSeries.computeFilterCoefficients();
+				multiSeries.computeAllFilterCoefficients();
 				sketchCanvas();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -415,13 +542,16 @@ public class iMetricaFXController {
 		
 		int val = (int)filterLength.getValue();
 		filterLengthText.setText(""+val);
-		anyMDFA.setFilterLength(val);
+		anyMDFAs.get(selectedSignal).setFilterLength(val);
 		
 		if(multiSeries != null) {
 			try {
-				multiSeries.getMDFAFactory().setFilterLength(val);
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				multiSeries.getMDFAFactory(selectedSignal).setFilterLength(val);
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -434,16 +564,19 @@ public class iMetricaFXController {
 		
 		int val = (int)sampleSize.getValue();
 		
-		if(multiSeries != null && val < multiSeries.getSeries(0).size()) {
+		if(multiSeries != null && val < multiSeries.size()) {
 		
 			sampleSizeText.setText(""+val);
-			anyMDFA.setSeriesLength(val);
+			anyMDFAs.get(selectedSignal).setSeriesLength(val);
 			
 			if(multiSeries != null) {
-				multiSeries.getMDFAFactory().setSeriesLength(val);
+				multiSeries.getMDFAFactory(selectedSignal).setSeriesLength(val);
 				try {
-					multiSeries.computeFilterCoefficients();
-					sketchCanvas();
+					if(autocomputeActivated) {
+						multiSeries.computeFilterCoefficients(selectedSignal);
+						multiSeries.computeAggregateSignal();
+						sketchCanvas();
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -455,15 +588,18 @@ public class iMetricaFXController {
 	protected void handlePhaseShiftChange() {
 		
 		double phase = phaseShift.getValue();
-		anyMDFA.setShift_constraint(phase);
+		anyMDFAs.get(selectedSignal).setShift_constraint(phase);
 		
 		if(multiSeries != null) {
 			
 			phaseText.setText(""+phase);
-			multiSeries.getMDFAFactory().setShift_constraint(phase);
+			multiSeries.getMDFAFactory(selectedSignal).setShift_constraint(phase);
 			try {
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -475,12 +611,15 @@ public class iMetricaFXController {
 		
 		int i1 = i1Checkbox.isSelected() ? 1 : 0;
 		
-		anyMDFA.setI1(i1);
+		anyMDFAs.get(selectedSignal).setI1(i1);
 		if(multiSeries != null) {
-			multiSeries.getMDFAFactory().setI1(i1);
+			multiSeries.getMDFAFactory(selectedSignal).setI1(i1);
 			try {
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -492,12 +631,15 @@ public class iMetricaFXController {
 		
 		int i2 = i2Checkbox.isSelected() ? 1 : 0;
 		
-		anyMDFA.setI2(i2);
+		anyMDFAs.get(selectedSignal).setI2(i2);
 		if(multiSeries != null) {
-			multiSeries.getMDFAFactory().setI2(i2);
+			multiSeries.getMDFAFactory(selectedSignal).setI2(i2);
 			try {
-				multiSeries.computeFilterCoefficients();
-				sketchCanvas();
+				if(autocomputeActivated) {
+					multiSeries.computeFilterCoefficients(selectedSignal);
+					multiSeries.computeAggregateSignal();
+					sketchCanvas();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -511,7 +653,8 @@ public class iMetricaFXController {
 			
 			try {
 
-		        plotCanvas.getChildren().set(0, TimeSeriesCanvas.createAreaChart(multiSeries, anyMDFA.getSeriesLength(), datetimeFormat));   
+		        plotCanvas.getChildren().set(0, TimeSeriesCanvas.createAreaChart(multiSeries, 
+		        		 anyMDFAs.get(selectedSignal).getSeriesLength(), selectedSignal, datetimeFormat));   
 								
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -519,7 +662,7 @@ public class iMetricaFXController {
 			
 			if(coeffWindow.isShowing()) {
 				
-				coeffPane.getChildren().set(0, CoefficientCanvas.createAreaChart(assetNames, multiSeries)); 
+				coeffPane.getChildren().set(0, CoefficientCanvas.createAreaChart(assetNames, multiSeries, selectedSignal)); 
 				coeffScene.setRoot(coeffPane);
 				coeffWindow.setScene(coeffScene);
 				
@@ -527,14 +670,14 @@ public class iMetricaFXController {
 			
 			if(frfWindow.isShowing()) {
 				
-			    frfPane.getChildren().set(0,FrequencyResponseCanvas.createAreaChart(assetNames, multiSeries));
+			    frfPane.getChildren().set(0,FrequencyResponseCanvas.createAreaChart(assetNames, multiSeries, selectedSignal));
 			    frfScene.setRoot(frfPane);
 			    frfWindow.setScene(frfScene);
 			}	
 			
 			if(phaseWindow.isShowing()) {
 				
-				phasePane.getChildren().set(0,PhaseCanvas.createAreaChart(assetNames, multiSeries));
+				phasePane.getChildren().set(0,PhaseCanvas.createAreaChart(assetNames, multiSeries, selectedSignal));
 				phaseScene.setRoot(phasePane);
 				phaseWindow.setScene(phaseScene);
 			}
@@ -543,7 +686,8 @@ public class iMetricaFXController {
 	
 	public void initiateCanvas() {
 		
-		plotCanvas.getChildren().add(TimeSeriesCanvas.createAreaChart(multiSeries, anyMDFA.getSeriesLength(), datetimeFormat));
+		plotCanvas.getChildren().add(TimeSeriesCanvas.createAreaChart(multiSeries, anyMDFAs.get(selectedSignal).getSeriesLength(), 
+				                                                        selectedSignal, datetimeFormat));
 		
 		initFrequencyRFWindow();
 		initPhaseWindow();
@@ -559,7 +703,7 @@ public class iMetricaFXController {
 			try {
 				
 				TimeSeriesEntry<double[]> observation = marketFeed.getNextMultivariateObservation();
-				multiSeries.addValue(observation.getValue(), observation.getDateTime());
+				multiSeries.addValue(observation.getDateTime(), observation.getValue());
 			
 			} catch (Exception e) {
 				
@@ -580,14 +724,18 @@ public class iMetricaFXController {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			multiSeries = new MultivariateSeries(new MDFASolver(anyMDFA));
-			multiSeries.setDateFormat("yyyy-MM-dd");
+			multiSeries = new MultivariateFXSeries(anyMDFAs, datetimeFormat);
 			
 			double d = fractionalD.getValue();
             int nsamples = (int)sampleSize.getValue() + 100;
 			
 			for(int i = 0; i < csvFileStreams.size(); i++) {
-				multiSeries.addSeries(new SignalSeries(new TargetSeries(d, true, assetNames.get(i)), "yyyy-MM-dd"));				
+				
+				try {
+					multiSeries.addSeries(new TargetSeries(d, true, assetNames.get(i)));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}				
 			}
 			
 			try {		
@@ -595,10 +743,10 @@ public class iMetricaFXController {
 				for(int i = 0; i < nsamples; i++) {
 					
 					TimeSeriesEntry<double[]> observation = marketFeed.getNextMultivariateObservation();
-					multiSeries.addValue(observation.getValue(), observation.getDateTime());
+					multiSeries.addValue(observation.getDateTime(), observation.getValue());
 					
 				}
-				multiSeries.computeFilterCoefficients();
+				multiSeries.computeAllFilterCoefficients();
 				multiSeries.chopFirstObservations(100);
 				
 			} catch (Exception e) {
@@ -608,13 +756,51 @@ public class iMetricaFXController {
 			}
 			sketchCanvas();		
 			
+			//Now add series list to targetSeriesMenu
+			targetSeriesSelection.getItems().clear();
+			targetRadioMenuList = new ArrayList<RadioMenuItem>();			
+			for(int i = 0; i < assetNames.size(); i++) {
+				
+				targetRadioMenuList.add((new RadioMenuItem(assetNames.get(i))));
+				targetRadioMenuList.get(i).setToggleGroup(targetSeriesSelect);
+				targetSeriesSelection.getItems().add(targetRadioMenuList.get(i));
+			}
+	
+			
+			
+
 		}	
 	}
 	
+	@FXML
+	protected void handleApplyPrefilter() {
+		
+		if(prefilterCheck.isSelected()) {
+			
+			multiSeries.prefilterActivate(true);
+			multiSeries.setWhiteNoisePrefilters(50);
+		}
+		else {
+			multiSeries.prefilterActivate(false);
+		}
+	   
+		try {
+			multiSeries.computeAllFilterCoefficients();
+			sketchCanvas();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	public void initiateMDFABase() {
 		
-		anyMDFA = new MDFABase()
+		
+		anyMDFAs 			= new ArrayList<MDFABase>();
+		signalRadioMenuList = new ArrayList<RadioMenuItem>();
+		targetRadioMenuList = new ArrayList<RadioMenuItem>();
+		
+		MDFABase anyMDFA = new MDFABase()
 				      .setAlpha(alphaSlider.getValue())
 				      .setLag(lagSlider.getValue())
 				      .setLambda(lambdaSlider.getValue())
@@ -629,13 +815,37 @@ public class iMetricaFXController {
 				      .setI2(i2Checkbox.isSelected() ? 1 : 0)
 				      .setShift_constraint(phaseShift.getValue())
 				      .setSeriesLength((int)sampleSize.getValue());		
+		
+		anyMDFAs.add(anyMDFA);
+		
+
+		
+		
 	}
 	
+	public MDFABase getNewMDFABase() {
+		
+		return new MDFABase()
+			      .setAlpha(alphaSlider.getValue())
+			      .setLag(lagSlider.getValue())
+			      .setLambda(lambdaSlider.getValue())
+			      .setBandPassCutoff(freqCutoff0.getValue())
+			      .setLowpassCutoff(freqCutoff1.getValue())
+			      .setCrossCorr(crossCorrelation.getValue())
+			      .setDecayStart(decayStart.getValue())
+			      .setDecayStrength(decayStrength.getValue())
+			      .setSmooth(smoothness.getValue())
+			      .setFilterLength((int)filterLength.getValue())
+			      .setI1(i1Checkbox.isSelected() ? 1 : 0)
+			      .setI2(i2Checkbox.isSelected() ? 1 : 0)
+			      .setShift_constraint(phaseShift.getValue())
+			      .setSeriesLength(anyMDFAs.get(anyMDFAs.size()-1).getSeriesLength());	
+	}
 	
 	private void initPhaseWindow() {
 		
 		phasePane = new StackPane();
-	    phasePane.getChildren().add(PhaseCanvas.createAreaChart(assetNames, multiSeries)); 
+	    phasePane.getChildren().add(PhaseCanvas.createAreaChart(assetNames, multiSeries, selectedSignal)); 
 	      
 	    phaseScene = new Scene(phasePane, 800, 600);
 	    phaseScene.getStylesheets().add("css/areachart.css");
@@ -656,7 +866,7 @@ public class iMetricaFXController {
 	private void initFrequencyRFWindow() {
 		
 		  frfPane = new StackPane();
-	      frfPane.getChildren().add(FrequencyResponseCanvas.createAreaChart(assetNames, multiSeries)); 
+	      frfPane.getChildren().add(FrequencyResponseCanvas.createAreaChart(assetNames, multiSeries, selectedSignal)); 
 	      
 	      frfScene = new Scene(frfPane, 800, 600);
 	      frfScene.getStylesheets().add("css/areachart.css");
@@ -678,7 +888,7 @@ public class iMetricaFXController {
 	private void initCoefficientWindow() {
 		
 		  coeffPane = new StackPane();
-	      coeffPane.getChildren().add(CoefficientCanvas.createAreaChart(assetNames, multiSeries)); 
+	      coeffPane.getChildren().add(CoefficientCanvas.createAreaChart(assetNames, multiSeries, selectedSignal)); 
 	      
 	      coeffScene = new Scene(coeffPane, 800, 600);
 	      coeffScene.getStylesheets().add("css/coeffchart.css");
@@ -701,6 +911,7 @@ public class iMetricaFXController {
 		
 		if(coeffCheckbox.isSelected()) {
 			coeffWindow.show();
+			sketchCanvas();
 		}
 		else {
 			coeffWindow.close();
@@ -712,6 +923,7 @@ public class iMetricaFXController {
 		
 		if(frfCheckbox.isSelected()) {
 			frfWindow.show();
+			sketchCanvas();
 		}
 		else {
 			frfWindow.close();
@@ -723,6 +935,7 @@ public class iMetricaFXController {
 		
 		if(phaseCheckbox.isSelected()) {
 			phaseWindow.show();
+			sketchCanvas();
 		}
 		else {
 			phaseWindow.close();
@@ -741,5 +954,35 @@ public class iMetricaFXController {
 		return formatter.parseDateTime(date);
 	}
     
+	
+	private void setControlsToMDFABase(MDFABase thisBase) {
+		
+		autocomputeActivated  = false;
+		smoothness.setValue(thisBase.getSmooth());
+		decayStrength.setValue(thisBase.getDecayStrength());
+		decayStart.setValue(thisBase.getDecayStart());
+		crossCorrelation.setValue(thisBase.getCrossCorr());
+		filterLength.setValue(thisBase.getFilterLength());
+		lagSlider.setValue(thisBase.getLag());
+		alphaSlider.setValue(thisBase.getAlpha());
+		lambdaSlider.setValue(thisBase.getLambda());
+		freqCutoff0.setValue(thisBase.getBandPassCutoff());
+		freqCutoff1.setValue(thisBase.getLowPassCutoff());
+		phaseShift.setValue(thisBase.getShift_constraint());
+		i2Checkbox.setSelected(thisBase.getI2() == 1);
+		i1Checkbox.setSelected(thisBase.getI1() == 1);
+		sampleSize.setValue(thisBase.getSeriesLength());
+		autocomputeActivated = true;
+		
+		try {
+			multiSeries.computeFilterCoefficients(selectedSignal);
+			multiSeries.computeAggregateSignal();
+		} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+		}
+	}
+	
+	
 	
 }

@@ -2,7 +2,7 @@ package application;
 
 import java.util.ArrayList;
 
-import ch.imetrica.mdfa.series.MultivariateSeries;
+import ch.imetrica.mdfa.series.MultivariateFXSeries;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.CategoryAxis;
@@ -16,7 +16,7 @@ public class CoefficientCanvas {
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static XYChart<CategoryAxis, NumberAxis> createAreaChart(ArrayList<String> names, MultivariateSeries series) {
+	public static XYChart<CategoryAxis, NumberAxis> createAreaChart(ArrayList<String> names, MultivariateFXSeries series, int selectedSeries) {
 		
 		  CategoryAxis xAxis = new CategoryAxis();
 	      NumberAxis yAxis = new NumberAxis();
@@ -31,8 +31,11 @@ public class CoefficientCanvas {
 	      
 	      if(series != null) {
 	    	  
-	    	  lc.setData(getChartData(names, series.getMDFACoeffs()));
-	      
+	    	  ArrayList<double[]> coeffs = new ArrayList<double[]>();
+	    	  for(int i = 0; i < series.getNumberSeries(); i++) {
+	    		  coeffs.add(series.getSeries(i).getCoefficientSet(selectedSeries));
+	    	  }	    	  
+	    	  lc.setData(getChartData(names, coeffs));    
 	      }
 
 	      return lc;

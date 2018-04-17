@@ -34,12 +34,24 @@
             <MenuItem mnemonicParsing="false" text="Quit" />
           </items>
         </Menu>
+            <Menu fx:id="signalMenu" mnemonicParsing="false" text="Signals">
+              <items>
+                <MenuItem fx:id="addNewSignal" mnemonicParsing="false" onAction="#handleAddNewSignal" text="Add New Signal" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+              </items>
+            </Menu>
+            <Menu fx:id="targetSeriesSelection" mnemonicParsing="false" text="Target Series" />
         <Menu fx:id="EditMenu" mnemonicParsing="false" text="TimeFormat">
                <items>
                   <RadioMenuItem fx:id="yyyyMMdd" mnemonicParsing="false" onAction="#handleDateFormatSelectToggle" text="&quot;yyyy-MM-dd&quot;" />
                   <RadioMenuItem fx:id="yyyyMMddHHmmss" mnemonicParsing="false" onAction="#handleDateFormatSelectToggle" text="&quot;yyyy-MM-dd HH:mm:ss&quot;" />
                </items>
         </Menu>
+            <Menu mnemonicParsing="false" text="Options">
+              <items>
+                  <CheckMenuItem fx:id="prefilterCheck" mnemonicParsing="false" onAction="#handleApplyPrefilter" text="Prefiltering On" />
+              </items>
+            </Menu>
             <Menu mnemonicParsing="false" text="Windows">
                <items>
                   <CheckMenuItem fx:id="frfCheckbox" mnemonicParsing="false" onAction="#toggleFrFWindow" text="Frequency Response" />

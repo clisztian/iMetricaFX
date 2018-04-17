@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import org.apache.commons.math3.complex.Complex;
 
-import ch.imetrica.mdfa.series.MultivariateSeries;
+import ch.imetrica.mdfa.series.MultivariateFXSeries;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.AreaChart;
@@ -17,7 +17,7 @@ public class FrequencyResponseCanvas {
 	static DecimalFormat decimalFormat = new DecimalFormat("#.##");	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static XYChart<NumberAxis, NumberAxis> createAreaChart(ArrayList<String> names, MultivariateSeries series) {
+	public static XYChart<NumberAxis, NumberAxis> createAreaChart(ArrayList<String> names, MultivariateFXSeries series, int selectedSeries) {
 		
 	      NumberAxis xAxis = new NumberAxis();
 	      NumberAxis yAxis = new NumberAxis();
@@ -31,7 +31,12 @@ public class FrequencyResponseCanvas {
 	      ac.setAlternativeRowFillVisible(false);
 	      
 	      if(series != null) {
-	    	  ac.setData(getChartData(names, series.getMDFACoeffs(), series.getSignalSize()));
+	    	  
+	    	  ArrayList<double[]> coeffs = new ArrayList<double[]>();
+	    	  for(int i = 0; i < series.getNumberSeries(); i++) {
+	    		  coeffs.add(series.getSeries(i).getCoefficientSet(selectedSeries));
+	    	  }	    	  
+	    	  ac.setData(getChartData(names, coeffs, series.getMDFAFactory(selectedSeries).getSeriesLength()));    
 	      }
 	      
 	      return ac;
