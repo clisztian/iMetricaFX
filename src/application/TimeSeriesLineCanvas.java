@@ -5,7 +5,7 @@ import ch.imetrica.mdfa.series.TimeSeriesEntry;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
@@ -16,7 +16,7 @@ import javafx.scene.chart.XYChart.Series;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
 
-public class TimeSeriesCanvas {
+public class TimeSeriesLineCanvas {
 
 	
 	static double minYValue = Double.MAX_VALUE;
@@ -25,7 +25,7 @@ public class TimeSeriesCanvas {
 
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static XYChart<DateAxis, NumberAxis> createAreaChart(MultivariateFXSeries series, int samples, int selectedSignal, String format) {
+	public static XYChart<DateAxis, NumberAxis> createLineChart(MultivariateFXSeries series, int samples, int selectedSignal, String format) {
 		
 		NumberAxis yAxis;
     	DateAxis xAxis = new DateAxis();
@@ -36,7 +36,7 @@ public class TimeSeriesCanvas {
     		yAxis = new NumberAxis(series.getMinValue(), series.getMaxValue(), .01);
     	}
         
-        AreaChart lc = new AreaChart<>(xAxis, yAxis);
+        LineChart lc = new LineChart<>(xAxis, yAxis);
 
 	      lc.setTitle("iMetricaFX Signal Extraction");	      
 	      lc.setCreateSymbols(false);
@@ -117,7 +117,7 @@ public class TimeSeriesCanvas {
     		  
     	   anySignals.get(n).setName("Signal " + n);
     	   data.add(anySignals.get(n));
-    	   linestyle[n] = ".default-color"+(n+1)+".chart-series-area-line";
+    	   linestyle[n] = ".default-color"+(n+1)+".chart-series-line";
     		  
        }				
 	   return data;
@@ -130,3 +130,4 @@ public class TimeSeriesCanvas {
 	
 	
 }
+

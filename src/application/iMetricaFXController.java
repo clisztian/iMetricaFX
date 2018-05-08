@@ -788,7 +788,6 @@ public class iMetricaFXController {
 			multiSeries.computeAllFilterCoefficients();
 			sketchCanvas();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

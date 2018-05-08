@@ -7,6 +7,7 @@
 .root {
     -fx-base: rgb(40, 40, 50);
     -fx-background: rgb(60, 60, 70);
+
     /* make controls (buttons, thumb, etc.) slightly lighter */
     -fx-color: derive(-fx-base, 10%);
 
@@ -55,76 +56,56 @@
 }
 
 
-.default-color0.chart-area-symbol {
+.default-color0.chart-line-symbol {
     -fx-background-color: #6fa6dc;
 /*    -fx-padding: 0;*/
 }
-.default-color1.chart-area-symbol {
+.default-color1.chart-line-symbol {
     -fx-background-color: #ff4d4d;
 /*    -fx-padding: 0;*/
 }
-.default-color2.chart-area-symbol {
+.default-color2.chart-line-symbol {
     -fx-background-color: rgb(77, 255, 77);
 /*    -fx-padding: 0;*/
 }
-.default-color3.chart-area-symbol {
+.default-color3.chart-line-symbol {
     -fx-background-color: rgb(255, 0, 255);
 /*    -fx-padding: 0;*/
 }
-.default-color4.chart-area-symbol {
+.default-color4.chart-line-symbol {
     -fx-background-color: rgb(0, 64, 255);
 /*    -fx-padding: 0;*/
 }
 
-.default-color0.chart-series-area-line { 
+.default-color0.chart-series-line { 
     -fx-stroke: #6fa6dc;
-    -fx-stroke-width: 1.5px; 
+    -fx-stroke-width: 1px; 
 }
 
-.default-color1.chart-series-area-line { 
+.default-color1.chart-series-line { 
 
     -fx-stroke: #ff4d4d; 
     -fx-stroke-width: 1px; 
     /*-fx-effect: dropshadow( gaussian , rgba(0,0,0,1) , 14, 0.2 , 1 , 9 );*/
 }
 
-.default-color2.chart-series-area-line { 
+.default-color2.chart-series-line { 
     -fx-stroke: rgb(77, 255, 77); 
     -fx-stroke-width: 1px; 
     
 }
-.default-color3.chart-series-area-line { 
+.default-color3.chart-series-line { 
     -fx-stroke: rgb(255, 0, 255); 
     -fx-stroke-width: 1px; 
 
 }
-.default-color4.chart-series-area-line { 
+.default-color4.chart-series-line { 
     -fx-stroke: rgb(0, 64, 255); 
     -fx-stroke-width: 1px; 
 
 }
 
-.default-color0.chart-series-area-fill { 
 
-    -fx-fill: linear-gradient(to bottom, #80d4ff, rgba(255,255,255,.5)); 
-    -fx-blend-mode: OVERLAY;
-}
-
-.default-color1.chart-series-area-fill { 
-    -fx-fill: transparent;
-}
-
-.default-color2.chart-series-area-fill { 
-    -fx-fill: transparent;
-}
-
-.default-color3.chart-series-area-fill { 
-    -fx-fill: transparent;
-}
-
-.default-color4.chart-series-area-fill { 
-    -fx-fill: transparent;
-}
 
 
 
@@ -141,7 +122,7 @@
     -fx-stroke: rgb(90, 90, 90);
 }
 
-/* .default-color0.chart-series-area-fill { 
+/* .default-color0.chart-series-line-fill { 
     -fx-fill: linear-gradient(to bottom, #3280cd, rgba(255,255,255,0)); 
     -fx-blend-mode: OVERLAY;
 }*/
