@@ -14,8 +14,10 @@ import ch.imetrica.mdfa.mdfa.MDFABase;
 import ch.imetrica.mdfa.series.MultivariateFXSeries;
 import ch.imetrica.mdfa.series.TargetSeries;
 import ch.imetrica.mdfa.series.TimeSeriesEntry;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -54,19 +56,26 @@ public class iMetricaFXController {
 	private ToggleGroup signalSelect;
 	private ArrayList<RadioMenuItem> signalRadioMenuList;
 	private ArrayList<RadioMenuItem> targetRadioMenuList;
-
+	private Task<Void> runMarket;
+	
 
 	Stage coeffWindow = new Stage();
 	Stage frfWindow = new Stage();
 	Stage phaseWindow = new Stage();
+	Stage explainWindow = new Stage();
+	Stage turningPointWindow = new Stage();
 	
 	StackPane coeffPane = new StackPane();
 	StackPane frfPane = new StackPane();
 	StackPane phasePane = new StackPane();
+	StackPane explainPane = new StackPane();
+	StackPane turningPointPane = new StackPane();
 	
 	Scene coeffScene;
 	Scene frfScene;
 	Scene phaseScene;
+	Scene explainScene;
+	Scene turningPointScene;
 	
 
 	public iMetricaFXController() { }
@@ -118,6 +127,12 @@ public class iMetricaFXController {
 	
 	@FXML 
 	private Button compileData;
+	
+	@FXML 
+	private Button streamDataButton;
+	
+	@FXML 
+	private Button stopDataButton;
 	
 	@FXML
 	private CheckBox i1Checkbox;
@@ -180,6 +195,9 @@ public class iMetricaFXController {
 	private CheckMenuItem frfCheckbox;
 
 	@FXML
+	private CheckMenuItem explainCheckbox;
+	
+	@FXML
 	private CheckMenuItem coeffCheckbox;
 	
 	@FXML
@@ -187,6 +205,12 @@ public class iMetricaFXController {
 	
 	@FXML
 	private CheckMenuItem prefilterCheck;
+	
+	@FXML
+	private CheckMenuItem useCaseMarketDriversCheckBox;
+	
+	@FXML
+	private CheckMenuItem turningPointCanvas;
 	
 	@FXML 
 	private Menu targetSeriesSelection;
@@ -200,6 +224,8 @@ public class iMetricaFXController {
 	private int selectedSignal = 0;
 
 	private boolean autocomputeActivated = true;
+
+	private Thread runMarketThread;
 
 	public void setToggleGroups() {
 		
@@ -314,7 +340,7 @@ public class iMetricaFXController {
 			signalRadioMenuList.get(signalRadioMenuList.size() - 1).setSelected(true);
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -646,6 +672,73 @@ public class iMetricaFXController {
 		}  
 	}
 	
+	
+	@FXML
+	protected void handleStopOnMarket() {
+		
+		if(runMarketThread != null && runMarketThread.isAlive()) {		
+
+			runMarketThread.interrupt();
+			runMarket.cancel();
+		}
+		
+	}
+	
+	
+	@FXML
+	protected void handleRunOnMarket() {
+		
+		
+		
+		runMarket = new Task<Void>() {
+			
+			@Override
+            protected Void call() throws Exception {
+				
+				while(true) {
+				
+					try { Thread.sleep(5000); // wait time in milliseconds to control duration
+			        } catch( InterruptedException e ) { }
+					
+					if(multiSeries != null) {
+						
+						TimeSeriesEntry<double[]> observation = marketFeed.getNextMultivariateObservation();
+						
+						if(observation == null) {
+							this.cancel();
+							break;
+						}
+		
+						multiSeries.addValue(observation.getDateTime(), observation.getValue());
+						multiSeries.computeAllFilterCoefficients();
+						multiSeries.computeAggregateSignal();
+						
+						Platform.runLater(new Runnable() {
+						    @Override
+						    public void run() {
+						    	sketchCanvas();
+						    }
+						});
+						
+						
+					}
+					
+					if (this.isCancelled()) {
+		                break;
+		            }				
+				}
+				return null;
+			}
+		};
+
+		
+		runMarketThread = new Thread(runMarket, "learn-thread");
+		runMarketThread.setDaemon(true);
+		runMarketThread.start();
+		
+	}
+	
+	
 	private void sketchCanvas() {
 			
 
@@ -681,6 +774,25 @@ public class iMetricaFXController {
 				phaseScene.setRoot(phasePane);
 				phaseWindow.setScene(phaseScene);
 			}
+			
+			if(explainWindow.isShowing()) {
+				
+
+				explainPane.getChildren().set(0, ExplainabilityCanvas.createAreaChart(assetNames, multiSeries, 
+						multiSeries.getTargetSeriesIndex(), anyMDFAs.get(selectedSignal).getLowPassCutoff()));
+				
+				
+				
+				explainScene.setRoot(explainPane);
+				explainWindow.setScene(explainScene);
+			}
+			
+			if(turningPointWindow.isShowing()) {
+				
+				turningPointPane.getChildren().set(0, TurningPointCanvas.createAreaChart(multiSeries, datetimeFormat, multiSeries.getTargetSeriesIndex())); 
+				turningPointScene.setRoot(turningPointPane);
+				turningPointWindow.setScene(turningPointScene);
+			}
 		}
 	}
 	
@@ -692,6 +804,8 @@ public class iMetricaFXController {
 		initFrequencyRFWindow();
 		initPhaseWindow();
 		initCoefficientWindow();
+		initExplainabilityWindow();
+		initTurningPointWindow();
 	}
 	
 	
@@ -868,7 +982,7 @@ public class iMetricaFXController {
 	      frfPane.getChildren().add(FrequencyResponseCanvas.createAreaChart(assetNames, multiSeries, selectedSignal)); 
 	      
 	      frfScene = new Scene(frfPane, 800, 600);
-	      frfScene.getStylesheets().add("css/areachart.css");
+	      frfScene.getStylesheets().add("css/timeserieschart.css");
 	      
 	      frfWindow = new Stage();
           frfWindow.setTitle("Frequency Response Functions");
@@ -884,13 +998,60 @@ public class iMetricaFXController {
 	}
 	
 
+	private void initExplainabilityWindow() {
+		
+		  new ExplainabilityCanvas(); 
+		  explainPane = new StackPane();
+		  explainPane.getChildren().add(ExplainabilityCanvas.createAreaChart(assetNames, multiSeries, 
+				  0, anyMDFAs.get(selectedSignal).getLowPassCutoff())); 
+		  
+
+	      
+	      explainScene = new Scene(explainPane, 800, 600);
+	      explainScene.getStylesheets().add("css/timeserieschart.css");
+	      
+	      explainWindow = new Stage();
+	      explainWindow.setTitle("Global Interpretability");
+	      explainWindow.setScene(explainScene);
+	      explainWindow.setX(primaryStage.getX() + 200);
+	      explainWindow.setY(primaryStage.getY() + 100);
+        
+	      explainWindow.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                explainCheckbox.setSelected(false);
+            }
+        });   
+	}
+		
+	private void initTurningPointWindow() {
+		
+
+		  turningPointPane = new StackPane();
+		  turningPointPane.getChildren().add(TurningPointCanvas.createAreaChart(multiSeries, datetimeFormat, 0)); 
+		  	      
+		  turningPointScene = new Scene(turningPointPane, 980, 700);
+		  turningPointScene.getStylesheets().add("css/timeserieschart.css");
+	      
+		  turningPointWindow = new Stage();
+		  turningPointWindow.setTitle("Real-Time Turning-Point Detection");
+		  turningPointWindow.setScene(turningPointScene);
+		  turningPointWindow.setX(primaryStage.getX() + 200);
+		  turningPointWindow.setY(primaryStage.getY() + 100);
+      
+		  turningPointWindow.setOnCloseRequest(new EventHandler<WindowEvent>() {
+          public void handle(WindowEvent we) {
+        	  turningPointCanvas.setSelected(false);
+          }
+      });   
+	}
+	
 	private void initCoefficientWindow() {
 		
 		  coeffPane = new StackPane();
 	      coeffPane.getChildren().add(CoefficientCanvas.createAreaChart(assetNames, multiSeries, selectedSignal)); 
 	      
 	      coeffScene = new Scene(coeffPane, 800, 600);
-	      coeffScene.getStylesheets().add("css/coeffchart.css");
+	      coeffScene.getStylesheets().add("css/timeserieschart.css");
 	      
 	      coeffWindow = new Stage();
           coeffWindow.setTitle("MDFA Coefficients");
@@ -941,7 +1102,33 @@ public class iMetricaFXController {
 		}
 	}
 	
+	@FXML
+	protected void toggleExplainWindow(ActionEvent event) {
+		
+		if(explainCheckbox.isSelected()) {
+			explainWindow.show();
+			sketchCanvas();
+		}
+		else {
+			explainWindow.close();
+		}
+	}
 
+	
+	@FXML
+	protected void toggleTurningPointWindow(ActionEvent event) {
+		
+		if(turningPointCanvas.isSelected()) {
+			turningPointWindow.show();
+			sketchCanvas();
+		}
+		else {
+			turningPointWindow.close();
+		}
+	}
+	
+	
+	
 	public void setStage(Stage primaryStage) {
 		this.primaryStage = primaryStage;
 	}
@@ -971,6 +1158,21 @@ public class iMetricaFXController {
 		i2Checkbox.setSelected(thisBase.getI2() == 1);
 		i1Checkbox.setSelected(thisBase.getI1() == 1);
 		sampleSize.setValue(thisBase.getSeriesLength());
+		
+		smoothnessText.setText("" + thisBase.getSmooth());
+		decayStrengthText.setText("" + thisBase.getDecayStrength());
+		decayStartText.setText("" + thisBase.getDecayStart());
+		crossCorrelationText.setText("" + thisBase.getCrossCorr());
+		filterLengthText.setText("" + thisBase.getFilterLength());
+		lagText.setText("" + thisBase.getLag());
+		alphaText.setText("" + thisBase.getAlpha());
+		lambdaText.setText("" + thisBase.getLambda());
+		freqCutoff0Text.setText("" + thisBase.getBandPassCutoff());
+		freqCutoff1Text.setText("" + thisBase.getLowPassCutoff());
+		phaseText.setText("" + thisBase.getShift_constraint());
+		sampleSizeText.setText("" + thisBase.getSeriesLength());
+		
+		
 		autocomputeActivated = true;
 		
 		try {
@@ -981,6 +1183,68 @@ public class iMetricaFXController {
 				e.printStackTrace();
 		}
 	}
+
+
+	@FXML
+	protected void handleApplyUseCase() {
+		
+		List<File> filelist = new ArrayList<File>();
+		filelist.add(new File("data/COFFEE.daily.csv"));
+		filelist.add(new File("data/SMI.daily.csv"));
+		filelist.add(new File("data/SFR.daily.csv"));
+		filelist.add(new File("data/FINANCE.daily.csv"));
+		filelist.add(new File("data/CRUDE.daily.csv"));
+		filelist.add(new File("data/EURO.daily.csv"));
+		filelist.add(new File("data/SUGAR.daily.csv"));
+		
+		csvFileStreams = new ArrayList<String>();
+		assetNames = new ArrayList<String>();
+		
+		for(File file : filelist) {
+			
+			csvFileStreams.add(file.getAbsolutePath());
+			assetNames.add(file.getName().split("[.]+")[0]);
+			System.out.println(file.getAbsolutePath());
+		}
+		
+		MDFABase base = new MDFABase().setAlpha(0)
+				                      .setBandPassCutoff(0.0)
+				                      .setCrossCorr(0)
+				                      .setDecayStart(.20)
+				                      .setDecayStrength(.20)
+				                      .setFilterLength(10)
+				                      .setHybridForecast(0)
+				                      .setI1(0)
+				                      .setI2(0)
+				                      .setLag(-2.0)
+				                      .setLambda(0)
+				                      .setLowpassCutoff(.52)
+				                      .setSmooth(.10);
+		
+		handleCompileData();		
+		setControlsToMDFABase(base);	
+		fractionalD.setValue(1.0);
+		handleFractionalDChange();
+		
+		prefilterCheck.setSelected(true);
+		handleApplyPrefilter();
+		
+		if(!turningPointWindow.isShowing()) {
+			turningPointWindow.show();
+		}
+		
+		if(!explainWindow.isShowing()) {
+			explainWindow.show();
+		}
+		
+		if(!coeffWindow.isShowing()) {
+			coeffWindow.show();
+		}
+		
+		
+		
+	}
+
 	
 	
 	

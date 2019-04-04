@@ -26,6 +26,7 @@
 
     /* color of non-focused yet selected elements */
     -fx-selection-bar-non-focused: rgb(60, 60, 60);
+
 }
 
 /* Fix derived prompt color for text fields */
@@ -127,10 +128,25 @@
 }
 
 
+.default-color0.chart-bar { -fx-bar-fill: CHART_COLOR_1; }
+.default-color1.chart-bar { -fx-bar-fill: CHART_COLOR_2; }
+.default-color2.chart-bar { -fx-bar-fill: CHART_COLOR_3; }
+.default-color3.chart-bar { -fx-bar-fill: CHART_COLOR_4; }
+.default-color4.chart-bar { -fx-bar-fill: CHART_COLOR_5; }
+.default-color5.chart-bar { -fx-bar-fill: CHART_COLOR_6; }
+.default-color6.chart-bar { -fx-bar-fill: CHART_COLOR_7; }
+.default-color7.chart-bar { -fx-bar-fill: CHART_COLOR_8; }
+.bar-legend-symbol {
+    -fx-padding: 8px;
+}
 
+
+.onHover{
+    -fx-background-color: ORANGE;
+}
 
 .chart-plot-background {
-    -fx-background-color: rgb(60, 60, 60);
+    -fx-background-color: rgb(30, 30, 60);
 }
 
 .chart-vertical-grid-lines {
@@ -145,4 +161,17 @@
     -fx-fill: linear-gradient(to bottom, #3280cd, rgba(255,255,255,0)); 
     -fx-blend-mode: OVERLAY;
 }*/
+
+
+
+.default-color0.chart-bar { -fx-bar-fill: -fx-not-achieved; }
+.default-color1.chart-bar { -fx-bar-fill: -fx-achieved; }
+.default-color2.chart-bar { -fx-bar-fill: -fx-exceeded; }
+
+.level-legend {
+  -fx-padding: 10; 
+  -fx-border-width: 2; 
+  -fx-background-color: rgba(211, 211, 211, 0.5); 
+  -fx-border-color: derive(rgba(211, 211, 211, 0.7), 10%);
+}
 
