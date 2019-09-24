@@ -61,7 +61,7 @@ public class ExplainabilityCanvas {
 	    	  
 	    	  ac.setData(getChartData(names, series, selectedSeries, targetFreq));  
 	    	  
-	    	  ac.setTitle("Current Market Drivers for " + names.get(selectedSeries) + " Last " + series.getMDFAFactory(0).getFilterLength() + " Days");
+	    	  ac.setTitle("Current Market-Impact Drivers for Swiss Economy Last " + series.getMDFAFactory(0).getFilterLength() + " Days");
 
 
 	    	  ac.setBarGap(1);
@@ -155,7 +155,7 @@ public class ExplainabilityCanvas {
 		
 			corells[num] = getCorrelation(target_coeffs, coeffs.get(num));
 			
-			//System.out.println(names.get(selectedSeries) + " with " + names.get(num) + " " + corells[num]);
+			System.out.println(names.get(selectedSeries) + " with " + names.get(num) + " " + corells[num]);
 			
 			Series<Double, String> frf = new Series<>();
 			String key = names.get(num);

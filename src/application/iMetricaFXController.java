@@ -192,6 +192,9 @@ public class iMetricaFXController {
 	private RadioMenuItem yyyyMMddHHmmss;	
 	
 	@FXML
+	private RadioMenuItem mmDDyyyy;
+	
+	@FXML
 	private CheckMenuItem frfCheckbox;
 
 	@FXML
@@ -232,6 +235,7 @@ public class iMetricaFXController {
 		dateFormatSelect = new ToggleGroup();
 		yyyyMMdd.setToggleGroup(dateFormatSelect);
 		yyyyMMddHHmmss.setToggleGroup(dateFormatSelect);
+		mmDDyyyy.setToggleGroup(dateFormatSelect);
 		yyyyMMdd.setSelected(true);		
 		
 		targetSeriesSelect = new ToggleGroup();
@@ -298,6 +302,10 @@ public class iMetricaFXController {
     	else if(dateFormatSelect.getSelectedToggle().equals(yyyyMMdd)) {
     		System.out.println("Set Dateformat to 'yyyy-MM-dd HH:mm:ss'");
     		datetimeFormat = "yyyy-MM-dd HH:mm:ss";
+    	}
+    	else if(dateFormatSelect.getSelectedToggle().equals(mmDDyyyy)) {
+    		System.out.println("Set Dateformat to 'M/d/yyyy H:mm'");
+    		datetimeFormat = "M/d/yyyy H:mm";
     	}
     }
 	
@@ -712,6 +720,7 @@ public class iMetricaFXController {
 						multiSeries.addValue(observation.getDateTime(), observation.getValue());
 						multiSeries.computeAllFilterCoefficients();
 						multiSeries.computeAggregateSignal();
+						
 						
 						Platform.runLater(new Runnable() {
 						    @Override
@@ -1212,22 +1221,24 @@ public class iMetricaFXController {
 				                      .setCrossCorr(0)
 				                      .setDecayStart(.20)
 				                      .setDecayStrength(.20)
-				                      .setFilterLength(10)
+				                      .setFilterLength(20)
 				                      .setHybridForecast(0)
 				                      .setI1(0)
 				                      .setI2(0)
 				                      .setLag(-2.0)
 				                      .setLambda(0)
-				                      .setLowpassCutoff(.52)
-				                      .setSmooth(.10);
+				                      .setLowpassCutoff(.28)
+				                      .setSmooth(.20);
 		
 		handleCompileData();		
 		setControlsToMDFABase(base);	
 		fractionalD.setValue(1.0);
 		handleFractionalDChange();
 		
-		prefilterCheck.setSelected(true);
-		handleApplyPrefilter();
+//		prefilterCheck.setSelected(true);
+//		handleApplyPrefilter();
+		handleFilterLengthChange();
+		handleFrequency1Change();
 		
 		if(!turningPointWindow.isShowing()) {
 			turningPointWindow.show();

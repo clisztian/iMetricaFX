@@ -38,7 +38,7 @@ public class TimeSeriesCanvas {
         
         AreaChart lc = new AreaChart<>(xAxis, yAxis);
 
-	      lc.setTitle("iMetricaFX Signal Extraction");	      
+	      lc.setTitle("signifAI Real-Time Signal Extraction");	      
 	      lc.setCreateSymbols(false);
 	      lc.applyCss();
 
